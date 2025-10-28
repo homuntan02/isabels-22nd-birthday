@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import bg from "./assets/bg.png";
+import bg from "./assets/start.png";
 import stand from "./assets/stand.png";      // standing sprite
 import walkRight from "./assets/walk-right.png"; // walking right sprite
 import walkLeft from "./assets/walk-left.png";   // walking left sprite
