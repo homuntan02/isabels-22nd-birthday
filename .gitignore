@@ -35,4 +35,7 @@ typings/
 *.tgz
 
 # Yarn Integrity file
-.yarn-integrity
+.yarn-integritynode_modules
+build
+dist
+.cache
