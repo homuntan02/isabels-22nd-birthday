@@ -52,6 +52,7 @@ button {
   cursor: pointer;
   box-shadow: 0 4px 0 #d66fb0;
 }
+
 button:active {
   transform: translateY(1px);
   box-shadow: 0 3px 0 #d66fb0;
@@ -88,7 +89,8 @@ button + button {
 }
 
 .close-btn:active {
-  transform: scale(0.95);
+  transform: scale(1e);
+  box-shadow: 0 0px 0 #000;
 }
 
 

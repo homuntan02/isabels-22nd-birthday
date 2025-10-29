@@ -17,7 +17,7 @@ export default function World() {
 
   // ---- Signboard placement/config ----
   const signX = 600;              // world coordinate for the sign
-  const interactRadius = 350;      // how close the player must be to interact
+  const interactRadius = 150;      // how close the player must be to interact
   const nearSign = Math.abs(x - signX) <= interactRadius;
   const signDX = signX - x; // how far the sign is from the center
 
@@ -186,8 +186,8 @@ export default function World() {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              width: "min(200vw, 2000px)",
-              maxHeight: "100vh",
+              width: "min(100vw, 1000px)",
+              maxHeight: "78vh",
               background: "rgba(255, 255, 255, 0.15)",  // mostly transparent
               border: "1px solid rgba(255,255,255,0.3)", // subtle glass border
               borderRadius: 16,
