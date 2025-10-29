@@ -60,6 +60,39 @@ button + button {
   margin-left: 12px;
 }
 
+/* === Close Button === */
+/* === Close button (top-right of modal) === */
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  background: none;
+  box-shadow: none;
+  border: none;
+  color: #ececec;
+  font-size: 75px;
+  font-weight: bold;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 10;
+  transition: transform 0.15s ease;
+}
+
+.close-btn:hover {
+  color: #b3b3b3;
+  transform: scale(1.2);
+}
+
+.close-btn:active {
+  transform: scale(0.95);
+}
+
+
+
 /* === World Screen === */
 .world {
   position: relative;
