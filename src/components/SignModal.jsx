@@ -42,6 +42,7 @@ export default function SignModal({ open, onClose, children }) {
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         style={{
+          outline: "none",
           width: "min(100vw, 1000px)",
           maxHeight: "78vh",
           background: "rgba(255, 255, 255, 0.15)",
