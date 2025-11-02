@@ -1,26 +1,77 @@
 import { useEffect, useRef, useState, useMemo } from "react";
-import bg from "./assets/start.png";
+import bg from "./assets/bg_long.png";
 import stand from "./assets/stand.png";
 import walkRight from "./assets/walk-right.png";
 import walkLeft from "./assets/walk-left.png";
-import signImg from "./assets/signboard.png"; // <-- add this image
-import zoomedSign from "./assets/zoomedsignboard.png";
+import signImg from "./assets/signboard.png";
+import Popup01 from "./popups/popup-01";
+import Popup02 from "./popups/popup-02";
+import Popup03 from "./popups/popup-03";
+import Popup04 from "./popups/popup-04";
+import Popup05 from "./popups/popup-05";
+import Popup06 from "./popups/popup-06";
+import Popup07 from "./popups/popup-07";
+import Popup08 from "./popups/popup-08";
+import Popup09 from "./popups/popup-09";
+import Popup10 from "./popups/popup-10";
+import Popup11 from "./popups/popup-11";
+import Popup12 from "./popups/popup-12";
+import Popup13 from "./popups/popup-13";
+import Popup14 from "./popups/popup-14";
+import Popup15 from "./popups/popup-15";
+import Popup16 from "./popups/popup-16";
+import Popup17 from "./popups/popup-17";
+import Popup18 from "./popups/popup-18";
+import Popup19 from "./popups/popup-19";
 
 export default function World() {
-  const [x, setX] = useState(0);                  // world position (player stays centered; world scrolls)
+  const [x, setX] = useState(0);
   const [direction, setDirection] = useState("stand");
-  const [isSignOpen, setIsSignOpen] = useState(false);
+  const [openSignId, setOpenSignId] = useState(null);
+  const isAnyModalOpen = !!openSignId;
   const timeoutRef = useRef(null);
 
   const step = 60;
-  const maxXRef = useRef(8000);
+  const maxXRef = useRef(36500);
 
   // ---- Signboard placement/config ----
-  const signX = 600;              // world coordinate for the sign
-  const interactRadius = 150;      // how close the player must be to interact
-  const nearSign = Math.abs(x - signX) <= interactRadius;
-  const signDX = signX - x; // how far the sign is from the center
+  const interactRadius = 250;
 
+  // Describe each sign: id, world x-position, and which popup component to show
+  const signs = useMemo(
+    () => [
+      { id: "sign-1",  x: 1875,  bottom: 26, heightVh: 30, Popup: Popup01 },
+      { id: "sign-2",  x: 3750,  bottom: 26, heightVh: 30, Popup: Popup02 },
+      { id: "sign-3",  x: 5475,  bottom: 26, heightVh: 30, Popup: Popup03 },
+      { id: "sign-4",  x: 7250,  bottom: 26, heightVh: 30, Popup: Popup04 },
+      { id: "sign-5",  x: 9125,  bottom: 26, heightVh: 30, Popup: Popup05 },
+      { id: "sign-6",  x: 10900, bottom: 26, heightVh: 30, Popup: Popup06 },
+      { id: "sign-7",  x: 12675, bottom: 26, heightVh: 30, Popup: Popup07 },
+      { id: "sign-8",  x: 14450, bottom: 26, heightVh: 30, Popup: Popup08 },
+      { id: "sign-9",  x: 16225, bottom: 26, heightVh: 30, Popup: Popup09 },
+      { id: "sign-10", x: 18000, bottom: 26, heightVh: 30, Popup: Popup10 },
+      { id: "sign-11", x: 19775, bottom: 26, heightVh: 30, Popup: Popup11 },
+      { id: "sign-12", x: 21550, bottom: 26, heightVh: 30, Popup: Popup12 },
+      { id: "sign-13", x: 23325, bottom: 26, heightVh: 30, Popup: Popup13 },
+      { id: "sign-14", x: 25100, bottom: 26, heightVh: 30, Popup: Popup14 },
+      { id: "sign-15", x: 26875, bottom: 26, heightVh: 30, Popup: Popup15 },
+      { id: "sign-16", x: 28650, bottom: 26, heightVh: 30, Popup: Popup16 },
+      { id: "sign-17", x: 30425, bottom: 26, heightVh: 30, Popup: Popup17 },
+      { id: "sign-18", x: 32200, bottom: 26, heightVh: 30, Popup: Popup18 },
+      { id: "sign-19", x: 36650, bottom: 26, heightVh: 30, Popup: Popup19 },
+    ],
+    []
+  );
+
+  // Compute distances / nearest sign (after signs exist)
+  const { nearest, nearAny, hintDX } = useMemo(() => {
+    if (!signs.length) return { nearest: null, nearAny: false, hintDX: 0 };
+    const distances = signs.map(s => ({ id: s.id, dx: s.x - x, dist: Math.abs(s.x - x) }));
+    const nearestLocal = distances.reduce((a, b) => (a && a.dist < b.dist ? a : b), null);
+    const nearAnyLocal = !!nearestLocal && nearestLocal.dist <= interactRadius;
+    const hintDXLocal = nearAnyLocal ? nearestLocal.dx : 0;
+    return { nearest: nearestLocal, nearAny: nearAnyLocal, hintDX: hintDXLocal };
+  }, [x, signs, interactRadius]);
 
   // cleanup timer
   useEffect(() => () => timeoutRef.current && clearTimeout(timeoutRef.current), []);
@@ -33,14 +84,14 @@ export default function World() {
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 
   const moveLeft = () => {
-    if (isSignOpen) return; // freeze movement while modal open
+    if (isAnyModalOpen) return;
     setX(prev => clamp(prev - step, 0, maxXRef.current));
     setDirection("left");
     setStandSoon();
   };
 
   const moveRight = () => {
-    if (isSignOpen) return;
+    if (isAnyModalOpen) return;
     setX(prev => clamp(prev + step, 0, maxXRef.current));
     setDirection("right");
     setStandSoon();
@@ -53,19 +104,16 @@ export default function World() {
       if (k === "arrowleft" || k === "a") { e.preventDefault(); moveLeft(); }
       else if (k === "arrowright" || k === "d") { e.preventDefault(); moveRight(); }
       else if (k === "e") {
-        if (!isSignOpen && nearSign) setIsSignOpen(true);
+        if (!isAnyModalOpen && nearAny && nearest) setOpenSignId(nearest.id);
       } else if (k === "escape") {
-        if (isSignOpen) setIsSignOpen(false);
+        if (isAnyModalOpen) setOpenSignId(null);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [nearSign, isSignOpen]);
+  }, [nearAny, nearest, isAnyModalOpen]); // nearest is fine here; it's memoized
 
   const sprite = direction === "left" ? walkLeft : direction === "right" ? walkRight : stand;
-
-  // Screen position of the sign (player is centered at 50vw)
-  const signScreenLeft = `calc(50vw + ${signX - x}px)`;
 
   return (
     <div
@@ -76,46 +124,49 @@ export default function World() {
         width: "100vw",
         height: "100vh",
         backgroundImage: `url(${bg})`,
-        backgroundRepeat: "repeat-x",
         backgroundSize: "auto 100%",
         backgroundPosition: `${-x}px bottom`,
-        transition: isSignOpen ? "none" : "background-position 0.2s linear",
+        backgroundRepeat: "no-repeat",
+        transition: isAnyModalOpen ? "none" : "background-position 0.2s linear",
       }}
     >
-      {/* Signboard */}
-      <img
-        src={signImg}
-        alt="Signboard"
-        onClick={() => {
-          if (nearSign) setIsSignOpen(true);
-        }}
-        style={{
-          position: "absolute",
-          bottom: "26vh",
-          left: "50%",
-          transform: `translateX(${signDX}px) translateX(-50%)`,
-          transition: "transform 0.2s linear",
-          willChange: "transform",
-          height: "30vh",
-          width: "auto",
-          imageRendering: "pixelated",
-          cursor: nearSign ? "pointer" : "default",
-          filter: nearSign
-            ? "drop-shadow(0 4px 8px rgba(0,0,0,0.3))"
-            : "none",
-          zIndex: 2,
-        }}
-      />
+      {/* Signboards */}
+      {signs.map((s) => {
+        const dx = s.x - x; // offset from player center
+        const isNear = Math.abs(dx) <= interactRadius;
 
+        return (
+          <img
+            key={s.id}
+            src={signImg}
+            alt="Signboard"
+            onClick={() => { if (!isAnyModalOpen && isNear) setOpenSignId(s.id); }}
+            style={{
+              position: "absolute",
+              bottom: `${s.bottom ?? 26}vh`,
+              left: "50%",
+              transform: `translateX(${dx}px) translateX(-50%)`,
+              transition: "transform 0.2s linear",
+              willChange: "transform",
+              height: `${s.heightVh ?? 30}vh`,
+              width: "auto",
+              imageRendering: "pixelated",
+              cursor: isNear ? "pointer" : "default",
+              filter: isNear ? "drop-shadow(0 4px 8px rgba(0,0,0,0.3))" : "none",
+              zIndex: 2,
+            }}
+          />
+        );
+      })}
 
-      {/* “Press E” hint when near the sign */}
-      {nearSign && !isSignOpen && (
+      {/* “Press E” hint near the nearest sign */}
+      {nearAny && !isAnyModalOpen && (
         <div
           style={{
             position: "absolute",
             bottom: "50vh",
             left: "50%",
-            transform: `translateX(${signDX}px) translateX(-50%)`,
+            transform: `translateX(${hintDX}px) translateX(-50%)`,
             transition: "transform 0.2s linear",
             padding: "6px 10px",
             background: "rgba(0,0,0,0.55)",
@@ -166,55 +217,19 @@ export default function World() {
         <button onClick={moveRight} aria-label="Move Right">▶</button>
       </div>
 
-      {/* MODAL OVERLAY (blur the world behind) */}
-      {isSignOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setIsSignOpen(false)}
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "rgba(0,0,0,0.35)",
-            backdropFilter: "blur(4px)",   // Safari/Chrome support; fine on iOS too
-            display: "grid",
-            placeItems: "center",
-            zIndex: 5,
-          }}
-        >
-          {/* Stop clicks inside the panel from closing */}
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "min(100vw, 1000px)",
-              maxHeight: "78vh",
-              background: "rgba(255, 255, 255, 0.15)",  // mostly transparent
-              border: "1px solid rgba(255,255,255,0.3)", // subtle glass border
-              borderRadius: 16,
-              padding: 16,
-              boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
-              position: "relative",
-              display: "grid",
-              gap: 12,
-            }}
-          >
-            {/* Close button (X) */}
-            <button className="close-btn" onClick={() => setIsSignOpen(false)}>✕</button>
-
-            {/* Zoomed sign image */}
-            <img
-              src={zoomedSign}
-              alt="Sign"
-              style={{
-                width: "100%",
-                height: "auto",
-                borderRadius: 12,
-                objectFit: "contain",
-              }}
-            />
-          </div>
-        </div>
-      )}
+      {/* Popups (render only the one whose id matches openSignId) */}
+      {signs.map((s) => {
+        const { Popup } = s;
+        const open = openSignId === s.id;
+        if (!open) return null;
+        return (
+          <Popup
+            key={s.id}
+            open={open}
+            onClose={() => setOpenSignId(null)}
+          />
+        );
+      })}
     </div>
   );
 }
